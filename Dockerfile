@@ -16,8 +16,8 @@ RUN mkdir -p \
     /usr/share/caddy
 
 # Tải Caddyfile và trang chào mừng mặc định
-RUN wget -O /etc/caddy/Caddyfile "https://github.com/caddyserver/dist/raw/main/config/Caddyfile" && \
-    wget -O /usr/share/caddy/index.html "https://github.com/caddyserver/dist/raw/main/welcome/index.html"
+RUN wget -O /etc/caddy/Caddyfile "https://github.com/caddyserver/dist/raw/33ae08ff08d168572df2956ed14fbc4949880d94/config/Caddyfile" && \
+    wget -O /usr/share/caddy/index.html "https://github.com/caddyserver/dist/raw/33ae08ff08d168572df2956ed14fbc4949880d94/welcome/index.html"
 
 # Lấy phiên bản mới nhất của Caddy từ GitHub API
 ENV CADDY_VERSION $(wget -qO- "https://api.github.com/repos/caddyserver/caddy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
