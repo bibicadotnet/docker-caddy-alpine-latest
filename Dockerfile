@@ -2,6 +2,11 @@
 FROM alpine:latest
 
 RUN apk add --no-cache \
+    curl \
+    jq \
+    wget \
+    tar \
+    bash \
 	ca-certificates \
 	libcap \
 	mailcap
