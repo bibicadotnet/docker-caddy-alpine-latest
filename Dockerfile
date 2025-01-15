@@ -16,7 +16,7 @@ RUN set -eux; \
 	wget -O /etc/caddy/Caddyfile "https://github.com/caddyserver/dist/raw/33ae08ff08d168572df2956ed14fbc4949880d94/config/Caddyfile"; \
 	wget -O /usr/share/caddy/index.html "https://github.com/caddyserver/dist/raw/33ae08ff08d168572df2956ed14fbc4949880d94/welcome/index.html"
 
-# Cài đặt Caddy từ GitHub - phiên bản mới nhất
+# Cài đặt Caddy từ bản phát hành mới nhất
 RUN set -eux; \
     apkArch="$(apk --print-arch)"; \
     case "$apkArch" in \
@@ -27,10 +27,11 @@ RUN set -eux; \
         ppc64el|ppc64le) binArch='ppc64le' ;; \
         riscv64) binArch='riscv64' ;; \
         s390x)   binArch='s390x' ;; \
-        *) echo >&2 "error: unsupported architecture ($apkArch)"; exit 1 ;;\
+        *) echo >&2 "error: unsupported architecture ($apkArch)"; exit 1 ;; \
     esac; \
-    # Tải và cài đặt phiên bản mới nhất của Caddy
-    wget -O /tmp/caddy.tar.gz "https://github.com/caddyserver/caddy/releases/latest/download/caddy_${binArch}.tar.gz"; \
+    # Lấy phiên bản mới nhất của Caddy từ GitHub API
+    latest_version=$(curl -s https://api.github.com/repos/caddyserver/caddy/releases/latest | jq -r .tag_name); \
+    wget -O /tmp/caddy.tar.gz "https://github.com/caddyserver/caddy/releases/download/$latest_version/caddy_$latest_version_linux_${binArch}.tar.gz"; \
     tar x -z -f /tmp/caddy.tar.gz -C /usr/bin caddy; \
     rm -f /tmp/caddy.tar.gz; \
     setcap cap_net_bind_service=+ep /usr/bin/caddy; \
