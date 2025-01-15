@@ -1,28 +1,14 @@
 # Sử dụng Alpine mới nhất
 FROM alpine:latest
 
-RUN apk add --no-cache \
+RUN set -eux; \
+    apk update && apk add --no-cache \
     curl \
     jq \
     wget \
     tar \
     bash \
-	ca-certificates \
-	libcap \
-	mailcap
-
-RUN set -eux; \
-	mkdir -p \
-		/config/caddy \
-		/data/caddy \
-		/etc/caddy \
-		/usr/share/caddy \
-	; \
-	wget -O /etc/caddy/Caddyfile "https://github.com/caddyserver/dist/raw/33ae08ff08d168572df2956ed14fbc4949880d94/config/Caddyfile"; \
-	wget -O /usr/share/caddy/index.html "https://github.com/caddyserver/dist/raw/33ae08ff08d168572df2956ed14fbc4949880d94/welcome/index.html"
-
-# Cài đặt Caddy từ bản phát hành mới nhất
-RUN set -eux; \
+    ca-certificates; \
     apkArch="$(apk --print-arch)"; \
     case "$apkArch" in \
         x86_64)  binArch='amd64' ;; \
@@ -34,14 +20,24 @@ RUN set -eux; \
         s390x)   binArch='s390x' ;; \
         *) echo >&2 "error: unsupported architecture ($apkArch)"; exit 1 ;; \
     esac; \
-    # Lấy phiên bản mới nhất của Caddy từ GitHub API
     latest_version=$(curl -s https://api.github.com/repos/caddyserver/caddy/releases/latest | jq -r .tag_name); \
+    echo "Latest version is: $latest_version"; \
     wget -O /tmp/caddy.tar.gz "https://github.com/caddyserver/caddy/releases/download/$latest_version/caddy_$latest_version_linux_${binArch}.tar.gz"; \
-    tar x -z -f /tmp/caddy.tar.gz -C /usr/bin caddy; \
+    tar xzf /tmp/caddy.tar.gz -C /usr/bin caddy; \
     rm -f /tmp/caddy.tar.gz; \
     setcap cap_net_bind_service=+ep /usr/bin/caddy; \
     chmod +x /usr/bin/caddy; \
     caddy version
+    
+RUN set -eux; \
+	mkdir -p \
+		/config/caddy \
+		/data/caddy \
+		/etc/caddy \
+		/usr/share/caddy \
+	; \
+	wget -O /etc/caddy/Caddyfile "https://github.com/caddyserver/dist/raw/33ae08ff08d168572df2956ed14fbc4949880d94/config/Caddyfile"; \
+	wget -O /usr/share/caddy/index.html "https://github.com/caddyserver/dist/raw/33ae08ff08d168572df2956ed14fbc4949880d94/welcome/index.html"
 
 # Thiết lập biến môi trường cho cấu hình và dữ liệu
 ENV XDG_CONFIG_HOME /config
