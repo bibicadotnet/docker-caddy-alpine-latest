@@ -1,10 +1,13 @@
 FROM alpine:latest
 
+# Cài đặt các gói cần thiết
 RUN apk add --no-cache \
     ca-certificates \
     libcap \
     mailcap \
-    wget
+    wget \
+    curl \
+    jq
 
 RUN set -eux; \
     mkdir -p \
@@ -27,7 +30,7 @@ RUN set -eux; \
         s390x)   binArch='s390x' ;; \
         *) echo >&2 "error: unsupported architecture ($apkArch)"; exit 1 ;; \
     esac; \
-    LATEST_VERSION=$(wget -qO- https://api.github.com/repos/caddyserver/caddy/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")'); \
+    LATEST_VERSION=$(curl -s https://api.github.com/repos/caddyserver/caddy/releases/latest | jq -r .tag_name); \
     LATEST_VERSION_NUM=${LATEST_VERSION#v}; \
     wget -O /tmp/caddy.tar.gz "https://github.com/caddyserver/caddy/releases/download/${LATEST_VERSION}/caddy_${LATEST_VERSION_NUM}_linux_${binArch}.tar.gz"; \
     tar x -z -f /tmp/caddy.tar.gz -C /usr/bin caddy; \
