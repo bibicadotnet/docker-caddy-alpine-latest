@@ -1,5 +1,4 @@
-# Sử dụng Alpine mới nhất
-FROM alpine:latest
+FROM alpine:3.20
 
 RUN apk update && apk add --no-cache ca-certificates libcap mailcap wget sha512sum
 
