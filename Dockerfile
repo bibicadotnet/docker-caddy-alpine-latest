@@ -22,6 +22,10 @@ RUN wget -O /etc/caddy/Caddyfile "https://github.com/caddyserver/dist/raw/33ae08
 # Lấy phiên bản mới nhất của Caddy từ GitHub API
 ENV CADDY_VERSION $(wget -qO- "https://api.github.com/repos/caddyserver/caddy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
+# In ra phiên bản Caddy và kiến trúc hệ thống để kiểm tra
+RUN echo "CADDY_VERSION: $CADDY_VERSION"
+RUN echo "apkArch: $(apk --print-arch)"
+
 # Tải và cài đặt Caddy
 RUN set -eux; \
     apkArch="$(apk --print-arch)"; \
@@ -35,7 +39,7 @@ RUN set -eux; \
         s390x)   binArch='s390x' ;; \
         *) echo >&2 "error: unsupported architecture ($apkArch)"; exit 1 ;;\
     esac; \
-    wget -O /tmp/caddy.tar.gz "https://github.com/caddyserver/caddy/releases/download/$CADDY_VERSION/caddy_${CADDY_VERSION#v}_linux_${binArch}.tar.gz"; \
+    wget --no-check-certificate -O /tmp/caddy.tar.gz "https://github.com/caddyserver/caddy/releases/download/$CADDY_VERSION/caddy_${CADDY_VERSION#v}_linux_${binArch}.tar.gz" || { echo "Failed to download Caddy"; exit 1; }; \
     tar x -z -f /tmp/caddy.tar.gz -C /usr/bin caddy; \
     rm -f /tmp/caddy.tar.gz; \
     setcap cap_net_bind_service=+ep /usr/bin/caddy; \
