@@ -1,12 +1,7 @@
 # Sử dụng Alpine mới nhất
 FROM alpine:latest
 
-RUN apk add --no-cache \
-	ca-certificates \
-	libcap \
-	mailcap \
-	wget \
-	sha512sum
+RUN apk update && apk add --no-cache ca-certificates libcap mailcap wget sha512sum
 
 # Tải về Caddyfile và index.html
 RUN set -eux; \
